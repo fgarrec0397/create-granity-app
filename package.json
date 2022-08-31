@@ -1,0 +1,22 @@
+{
+  "name": "create-granity-app",
+  "version": "1.0.1",
+  "description": "Create a Granity project with one line command.",
+  "main": "index.js",
+  "bin": {
+    "create-granity-app": "bin/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fgarrec0397/create-granity-app.git"
+  },
+  "author": "Fabrice Garrec",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fgarrec0397/create-granity-app/issues"
+  },
+  "homepage": "https://github.com/fgarrec0397/create-granity-app#readme"
+}
