@@ -55,7 +55,7 @@ const cleanUpRepo = () => {
     displayMessage("Hold on! Just removing our crap for you...");
 
     // delete a file
-    deletefile("CODE_OF_CONDUCT.md")
+    // deletefile("CODE_OF_CONDUCT.md")
     
 }
 
@@ -71,7 +71,7 @@ const installDependencies = () => {
 
 const init = () => {
     cloneRepository();
-    cleanUpRepo();
+    // cleanUpRepo();
     installDependencies();
 };
 
