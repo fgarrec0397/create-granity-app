@@ -41,6 +41,8 @@ const projectName = process.argv[2];
 const gitCheckoutCommand = `git clone --depth 1 ${gitRepo} ${projectName}`;
 const installDepsCommand = `cd ${projectName} && npm install && cd app && npm install && cd ../server && npm install`
 
+console.log("last version is 1.0.12")
+
 const cloneRepository = () => {
     displayMessage(`Cloning the repositery with name ${projectName}`);
     
@@ -72,7 +74,7 @@ const installDependencies = () => {
 const init = () => {
     cloneRepository();
     // cleanUpRepo();
-    installDependencies();
+    // installDependencies();
 };
 
 
