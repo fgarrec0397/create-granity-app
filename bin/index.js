@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { execSync } = require("child_process");
+// const latestVersion = require("latest-version");
 const fs = require('fs');
 
 const displayMessage = (text) => {
@@ -41,7 +42,20 @@ const projectName = process.argv[2];
 const gitCheckoutCommand = `git clone --depth 1 ${gitRepo} ${projectName}`;
 const installDepsCommand = `cd ${projectName} && npm install && cd app && npm install && cd ../server && npm install`
 
-console.log("last version is 1.0.13")
+console.log("last version is 1.0.14")
+
+// const spinner = ora().start('Ensuring latest version');
+// const latestVer = await latestVersion('gev');
+// if (compareSemver(VERSION, latestVer) === -1) {
+//   spinner.info(`The current version of gev [${chalk.keyword('brown')(VERSION)}] is lower than the latest available version [${chalk.yellow(latestVer)}]. Recalling gev with @latest...`);
+//   const rawProgramArgs = process.argv.slice(2);
+//   await execa('npx', ['gev@latest', '--no-check-latest', ...rawProgramArgs], { env: {
+//     npm_config_yes: 'true', // https://github.com/npm/cli/issues/2226#issuecomment-732475247
+//   } });
+//   return;
+// } else { // Same version. We are running the latest one!
+//   spinner.succeed();
+// }
 
 const cloneRepository = () => {
     displayMessage(`Cloning the repositery with name ${projectName}`);
@@ -57,7 +71,7 @@ const cleanUpRepo = () => {
     displayMessage("Hold on! Just removing our crap for you...");
 
     // delete a file
-    // deletefile("CODE_OF_CONDUCT.md")
+    deletefile("CODE_OF_CONDUCT.md");
     
 }
 
@@ -73,7 +87,7 @@ const installDependencies = () => {
 
 const init = () => {
     cloneRepository();
-    // cleanUpRepo();
+    cleanUpRepo();
     // installDependencies();
 };
 

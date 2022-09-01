@@ -1,6 +1,6 @@
 {
   "name": "create-granity-app",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Create a Granity project with one line command.",
   "main": "index.js",
   "bin": {
