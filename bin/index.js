@@ -1,8 +1,21 @@
 #!/usr/bin/env node
 
-const { execSync } = require("child_process");
-// const latestVersion = require("latest-version");
-const fs = require('fs');
+import { execSync } from "child_process";
+import fs from "fs"
+import latestVersion from "latest-version";
+
+const gitRepo = "https://github.com/fgarrec0397/Granity.git";
+const projectName = process.argv[2];
+const gitCheckoutCommand = `git clone --depth 1 ${gitRepo} ${projectName}`;
+const installDepsCommand = `cd ${projectName} && npm install && cd app && npm install && cd ../server && npm install`
+
+const itemsToDelete = [
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    ".git",
+    ".github",
+]
 
 const displayMessage = (text) => {
     console.log();
@@ -22,40 +35,35 @@ const runCommand = command => {
     return true;
 };
 
-const deletefile = (file) => {
-    fs.unlink(file, (err) => {
+const deleteItem = async (dir, logDeletedItem) => {
+    await fs.rm(dir, { recursive: true }, err => {
         if (err) {
-            throw err;
+          throw err
         }
+      
+        if (logDeletedItem) {
+            console.log(`${dir} is deleted!`)
+        }
+      })
+}
 
-        console.log("File is deleted.");
+const deleteItems = async (items, logDeletedItem) => {
+    await items.forEach(async x => {
+        await deleteItem(`${projectName}/${x}`, logDeletedItem);
     });
-};
+}
 
 const exit = (withError) => {
     displayMessage("Process has terminated.")
     process.exit(withError ? 1 : 0);    
 };
 
-const gitRepo = "https://github.com/fgarrec0397/Granity.git";
-const projectName = process.argv[2];
-const gitCheckoutCommand = `git clone --depth 1 ${gitRepo} ${projectName}`;
-const installDepsCommand = `cd ${projectName} && npm install && cd app && npm install && cd ../server && npm install`
-
-console.log("last version is 1.0.14")
-
-// const spinner = ora().start('Ensuring latest version');
-// const latestVer = await latestVersion('gev');
-// if (compareSemver(VERSION, latestVer) === -1) {
-//   spinner.info(`The current version of gev [${chalk.keyword('brown')(VERSION)}] is lower than the latest available version [${chalk.yellow(latestVer)}]. Recalling gev with @latest...`);
-//   const rawProgramArgs = process.argv.slice(2);
-//   await execa('npx', ['gev@latest', '--no-check-latest', ...rawProgramArgs], { env: {
-//     npm_config_yes: 'true', // https://github.com/npm/cli/issues/2226#issuecomment-732475247
-//   } });
-//   return;
-// } else { // Same version. We are running the latest one!
-//   spinner.succeed();
-// }
+const handleStart = async () => {
+    const granityCLILastVersion = await latestVersion("granity");
+    displayMessage(`Welcome to create-granity-app!`);
+    displayMessage(`You are currently running the v${granityCLILastVersion} CLI runner.`);
+    displayMessage("Enjoy the ride, you're almost there...");
+};
 
 const cloneRepository = () => {
     displayMessage(`Cloning the repositery with name ${projectName}`);
@@ -67,16 +75,14 @@ const cloneRepository = () => {
     }
 }
 
-const cleanUpRepo = () => {
+const cleanUpRepo = async () => {
     displayMessage("Hold on! Just removing our crap for you...");
 
-    // delete a file
-    deletefile("CODE_OF_CONDUCT.md");
-    
+    await deleteItems(itemsToDelete);
 }
 
 const installDependencies = () => {
-    console.log(`Installing dependencies for ${projectName}`);
+    displayMessage(`Installing dependencies for ${projectName}`);
     
     const installingCommand = runCommand(installDepsCommand);
     
@@ -85,13 +91,25 @@ const installDependencies = () => {
     }
 };
 
-const init = () => {
-    cloneRepository();
-    cleanUpRepo();
-    // installDependencies();
+const handleFinish = async () => {
+    const granityLastVersion = await latestVersion("granity");
+
+    console.log();
+    console.log(`Congratulation! You are now ready to work with Granity v${granityLastVersion}`);
+    console.log();
+    console.log("You should start by setting up your MongoDB then run the following command:")
+    console.log();
+    console.log(`cd ${projectName} && npm run dev`)
+    console.log();
+    console.log();
 };
 
-
-console.log(`Congratulation! You are now ready to work`);
+const init = async () => {
+    await handleStart();
+    cloneRepository();
+    await cleanUpRepo();
+    installDependencies();
+    await handleFinish();
+};
 
 init();

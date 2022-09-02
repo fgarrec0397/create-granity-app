@@ -1,8 +1,9 @@
 {
   "name": "create-granity-app",
-  "version": "1.0.14",
+  "version": "1.0.40",
   "description": "Create a Granity project with one line command.",
   "main": "index.js",
+  "type": "module",
   "bin": {
     "create-granity-app": "bin/index.js"
   },
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/fgarrec0397/create-granity-app/issues"
   },
-  "homepage": "https://github.com/fgarrec0397/create-granity-app#readme"
+  "homepage": "https://github.com/fgarrec0397/create-granity-app#readme",
+  "dependencies": {
+    "latest-version": "^7.0.0"
+  }
 }
