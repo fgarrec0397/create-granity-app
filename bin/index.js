@@ -4,10 +4,14 @@ import { execSync } from "child_process";
 import fs from "fs"
 import latestVersion from "latest-version";
 
-const gitRepo = "https://github.com/fgarrec0397/Granity.git";
+const appName = "granity";
+const packageName = `create-${appName}-app`;
+const gitURL = `https://github.com/fgarrec0397/${appName}`;
+const gitRepo = `${gitURL}.git`;
 const projectName = process.argv[2];
 const gitCheckoutCommand = `git clone --depth 1 ${gitRepo} ${projectName}`;
 const installDepsCommand = `cd ${projectName} && npm install && cd app && npm install && cd ../server && npm install`;
+const gitInitCommand = `cd ${projectName} && git init`;
 
 const itemsToDelete = [
     ".git",
@@ -36,10 +40,23 @@ const displayMessage = (text) => {
  * @param {string} command The command to run 
  * @returns {boolean} Returns true if the command has been executed with success
  */
-const runCommand = command => {
+const runCommand = (command, fallbackCommand) => {
     try {
         execSync(`${command}`, { stdio: "inherit" });
     } catch (error) {
+
+        if (fallbackCommand) {
+            try {
+                execSync(`${fallbackCommand}`, { stdio: "inherit" });
+            } catch (error) {
+                displayMessage(`Failed to execute ${fallbackCommand}`, error);
+                
+                return false;
+            }
+
+            return true;
+        }
+
         displayMessage(`Failed to execute ${command}`, error);
         
         return false;
@@ -53,8 +70,8 @@ const runCommand = command => {
  * @param {string} item Item to delete, can be a file or a folder
  * @param {boolean} logDeletedItem If set to true, it will log the deleted item  
  */
-const deleteItem = (item, logDeletedItem) => {
-    fs.rm(item, { recursive: true }, err => {
+const deleteItem = async (item, logDeletedItem) => {
+    await fs.rm(item, { recursive: true }, err => {
         if (err) {
           throw err
         }
@@ -70,7 +87,7 @@ const deleteItem = (item, logDeletedItem) => {
  * @param {string[]} items Array of items to delete, can be a file, a folder or both
  * @param {boolean} logDeletedItem If set to true, it will log the deleted item  
  */
-const deleteItems = (items, logDeletedItem) => {
+const deleteItems = async (items, logDeletedItem) => {
     items.forEach(x => {
         deleteItem(`${projectName}/${x}`, logDeletedItem);
     });
@@ -103,15 +120,61 @@ const createPackageJsonFile = () => {
 
 }
 
+/**
+ * Build a remote action command based on a name and a commandType. ("add" or "remove")
+ * 
+ * @param {string} remoteName - The given name of the remote
+ * @param {"add"|"remove"} commandType - The action type of the command
+ */
+const gitBuildRemoteCommand = (remoteName, commandType) => {
+    const url = commandType === "add" ? gitURL : "";
+
+    return `cd ${projectName} && git remote ${commandType} ${remoteName} ${url}`
+};
+
+/**
+ * Add a remote to the current git repository
+ * 
+ * @param {string} remoteName - The given name of the remote
+ */
+const addRemote = (remoteName) => {
+    displayMessage(`Adding the ${remoteName} remote.`);
+
+    const gitAddRemoteCommand = gitBuildRemoteCommand(remoteName, "add");
+    
+    const addRemoteCommand = runCommand(gitAddRemoteCommand);
+    
+    if (!addRemoteCommand) {
+        exit(true);
+    }
+}
+
+/**
+ * Add a remote to the current git repository
+ * 
+ * @param {string} remoteName - The given name of the remote
+ */
+const removeRemote = (remoteName) => {
+    displayMessage(`Adding the ${remoteName} remote.`);
+
+    const gitRemoveRemoteCommand = gitBuildRemoteCommand(remoteName, "remove");
+    
+    const removeRemoteCommand = runCommand(gitRemoveRemoteCommand);
+    
+    if (!removeRemoteCommand) {
+        exit(true);
+    }
+}
+
 
 /**
  * <------------------------------- CLI ACTIONS ------------------------------->
  */
 
 const handleStart = async () => {
-    const granityCLILastVersion = await latestVersion("create-granity-app");
-    displayMessage(`Welcome to create-granity-app!`);
-    displayMessage(`You are currently running the v${granityCLILastVersion} CLI runner.`);
+    const packageLastVersion = await latestVersion(packageName);
+    displayMessage(`Welcome to ${packageName}!`);
+    displayMessage(`You are currently running the v${packageLastVersion} CLI runner.`);
 };
 
 const cloneRepository = () => {
@@ -122,12 +185,26 @@ const cloneRepository = () => {
     if (!checkedOut) {
         exit(true);
     }
+
 }
 
-const cleanUpRepo = () => {
+const cleanUpRepo = async () => {
     displayMessage("Hold on! Just removing our crap for you...");
 
-    deleteItems(itemsToDelete);
+    await deleteItems(itemsToDelete);
+}
+
+const setupGit = () => {
+    // Need to make cleaner. Don't know why fs.rm is asynchrone but can't apply await/async to get rid of these setTimeout
+    setTimeout(() => {
+        const reInitGit = runCommand(`cd ${projectName} && git init`);
+        
+        if (!reInitGit) {
+            exit(true);
+        }
+        
+        addRemote(appName);
+    }, 10)
 }
 
 const setupFolder = () => {
@@ -163,7 +240,7 @@ const installDependencies = () => {
 };
 
 const handleFinish = async () => {
-    const granityLastVersion = await latestVersion("granity");
+    const granityLastVersion = await latestVersion(appName);
 
     console.log();
     console.log(`Congratulation! You are now ready to work with Granity v${granityLastVersion}`);
@@ -178,9 +255,10 @@ const handleFinish = async () => {
 const init = async () => {
     await handleStart();
     cloneRepository();
-    cleanUpRepo();
+    await cleanUpRepo();
     setupFolder();
-    installDependencies();
+    setupGit();
+    // installDependencies();
 };
 
 init();
