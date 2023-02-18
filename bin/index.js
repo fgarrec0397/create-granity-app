@@ -87,12 +87,27 @@ const exit = (withError) => {
 
 /**
  * A function to create the package.json file
- * @TODO Could extract the write function to keep this function more generic
  */
 const createPackageJsonFile = () => {
-    const packageJSONfileTemplate = `{\n  \"name\": \"${projectName}\",\n  \"version\": \"1.0.0\",\n  \"description\": \"My cool new game!\",\n  \"scripts\": {\n    \"server\": \"cd server && npm start\",\n    \"client\": \"cd app && npm start\",\n    \"dev\": \"concurrently \\\"npm run server\\\" \\\"npm run client\\\"\"\n  },\n  \"author\": \"\",\n  \"license\": \"MIT\",\n  \"devDependencies\": {\n    \"concurrently\": \"^7.3.0\"\n  }\n}\n`;
+    const filePath = `${projectName}/package.json`;
 
-    fs.writeFile(`${projectName}/package.json`, packageJSONfileTemplate, 'utf8', function (err) {
+    const rawdata = fs.readFileSync(filePath);
+    const packageFile = JSON.parse(rawdata);
+    console.log(packageFile);    
+    const keysToRemove = [
+        "author",
+        "license",
+        "homepage",
+        "repository"
+    ]
+
+    keysToRemove.forEach(x => {
+        delete packageFile[x];
+    })
+
+    packageFile.name = projectName;
+
+    fs.writeFile(filePath, JSON.stringify(packageFile, null, 2), 'utf8', function (err) {
         if (err) {
             console.log("An error occured while writing JSON Object to File.");
             return console.log(err);
@@ -102,7 +117,6 @@ const createPackageJsonFile = () => {
     });
 
 }
-
 
 /**
  * <------------------------------- CLI ACTIONS ------------------------------->
