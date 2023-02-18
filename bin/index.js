@@ -93,7 +93,6 @@ const createPackageJsonFile = () => {
 
     const rawdata = fs.readFileSync(filePath);
     const packageFile = JSON.parse(rawdata);
-    console.log(packageFile);    
     const keysToRemove = [
         "author",
         "license",
