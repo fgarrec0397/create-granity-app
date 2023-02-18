@@ -7,7 +7,7 @@ import latestVersion from "latest-version";
 const gitRepo = "https://github.com/fgarrec0397/Granity.git";
 const projectName = process.argv[2];
 const gitCheckoutCommand = `git clone --depth 1 ${gitRepo} ${projectName}`;
-const installDepsCommand = `cd ${projectName} && npm install && cd app && npm install && cd ../server && npm install`;
+const installDepsCommand = `cd ${projectName} && npm install`;
 
 const itemsToDelete = [
     ".git",
